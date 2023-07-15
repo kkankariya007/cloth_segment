@@ -157,7 +157,7 @@ def check_or_download_model(file_path):
         print("Model already exists.")
 
 
-def load_seg_model(checkpoint_path='model\cloth_segm.pth', device='cpu'):
+def load_seg_model(checkpoint_path='model/cloth_segm.pth', device='cpu'):
     net = U2NET(in_ch=3, out_ch=4)
     check_or_download_model(checkpoint_path)
     net = load_checkpoint(net, checkpoint_path)
