@@ -3,7 +3,6 @@ torchvision
 gradio
 gdown
 Pillow
-opencv-python
 numpy
 fastapi
 gunicorn

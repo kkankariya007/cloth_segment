@@ -6,7 +6,6 @@ import shutil
 import io
 from io import BytesIO
 from PIL import Image
-import cv2
 import gdown
 import argparse
 import numpy as np
@@ -131,6 +130,7 @@ def generate_mask(input_image, net, palette, device = 'cpu'):
         if np.any(output_arr == cls):
             classes_to_save.append(cls)
 
+    # Save alpha masks
     for cls in classes_to_save:
         alpha_mask = (output_arr == cls).astype(np.uint8) * 255
         alpha_mask = alpha_mask[0]  # Selecting the first channel to make it 2D
