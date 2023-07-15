@@ -105,7 +105,6 @@ def apply_transform(img):
 
 def generate_mask(input_image, net, palette, device = 'cpu'):
 
-    #img = Image.open(input_image).convert('RGB')
     img = input_image
     img_size = img.size
     img = img.resize((768, 768), Image.BICUBIC)
@@ -132,7 +131,6 @@ def generate_mask(input_image, net, palette, device = 'cpu'):
         if np.any(output_arr == cls):
             classes_to_save.append(cls)
 
-    # Save alpha masks
     for cls in classes_to_save:
         alpha_mask = (output_arr == cls).astype(np.uint8) * 255
         alpha_mask = alpha_mask[0]  # Selecting the first channel to make it 2D
