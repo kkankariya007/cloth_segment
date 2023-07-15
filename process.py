@@ -2,6 +2,7 @@ from network import U2NET
 from fastapi import FastAPI
 from fastapi import UploadFile, File
 import os
+import shutil
 import io
 from io import BytesIO
 from PIL import Image
@@ -9,11 +10,11 @@ import cv2
 import gdown
 import argparse
 import numpy as np
-
+from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-
 from collections import OrderedDict
 from options import opt
 
@@ -175,6 +176,9 @@ async def main(file: bytes = File(...)):
     image=io.BytesIO(file)
     img = Image.open(image).convert('RGB')
     cloth_seg = generate_mask(img, net=model, palette=palette, device=device)
+    shutil.make_archive("segmentation", 'zip', "output")
+    return FileResponse(path='segmentation.zip', filename="segmentation.zip")               
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Help to set arguments for Cloth Segmentation.')

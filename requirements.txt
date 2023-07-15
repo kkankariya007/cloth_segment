@@ -5,3 +5,7 @@ gdown
 Pillow
 opencv-python
 numpy
+fastapi
+gunicorn
+uvicorn
+shutil
