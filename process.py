@@ -7,6 +7,7 @@ import io
 from io import BytesIO
 from PIL import Image
 import gdown
+from PIL import ImageChops
 import argparse
 import numpy as np
 from fastapi.responses import StreamingResponse
@@ -16,6 +17,8 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 from collections import OrderedDict
 from options import opt
+import matplotlib.pyplot as plt
+
 
 app = FastAPI()
 def load_checkpoint(model, checkpoint_path):
@@ -145,8 +148,6 @@ def generate_mask(input_image, net, palette, device = 'cpu'):
     cloth_seg.save(os.path.join(cloth_seg_out_dir, 'final_seg.png'))
     return cloth_seg
 
-
-
 def check_or_download_model(file_path):
     if not os.path.exists(file_path):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -174,6 +175,16 @@ async def main(file: bytes = File(...)):
     image=io.BytesIO(file)
     img = Image.open(image).convert('RGB')
     cloth_seg = generate_mask(img, net=model, palette=palette, device=device)
+    c_s = Image.open('output\\cloth_seg\\final_seg.png').convert('RGBA')
+    c_s_array = np.array(c_s)
+    black_pixels = np.all(c_s_array[:, :, :3] == [0, 0, 0], axis=-1)
+    c_s_array[black_pixels, 3] = 0
+    c_s_modified = Image.fromarray(c_s_array)
+    c_s_modified = c_s_modified.resize(img.size, Image.ANTIALIAS)
+    overlay = Image.new('RGBA', img.size)
+    overlay.paste(c_s_modified, (0, 0), c_s_modified)
+    overlayed_img = Image.alpha_composite(img.convert('RGBA'), overlay)
+    overlayed_img.save('output\\overlay.png', format='PNG')
     shutil.make_archive("segmentation", 'zip', "output")
     return FileResponse(path='segmentation.zip', filename="segmentation.zip")               
 
