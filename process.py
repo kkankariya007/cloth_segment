@@ -18,6 +18,8 @@ import torchvision.transforms as transforms
 from collections import OrderedDict
 from options import opt
 import matplotlib.pyplot as plt
+import cv2
+
 
 
 app = FastAPI()
@@ -187,7 +189,39 @@ async def main(file: bytes = File(...)):
     overlayed_img.save('output\\overlay.png', format='PNG')
     shutil.make_archive("segmentation", 'zip', "output")
     return FileResponse(path='segmentation.zip', filename="segmentation.zip")               
+@app.get("/size")
+async def sizeDetetermine():
+    image = cv2.imread('output\\Gen fill_seg\\1.png')
 
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    _, binary = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
+
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    max_width = 0
+
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        if w > max_width:
+            max_width = w
+
+    # print("The width of the widest white region is:", max_width)
+    if max_width>1100 and max_width<1200:
+        print("Recommended shirt size is S")
+        return "Recommended shirt size is S"
+    elif max_width>1200 and max_width<1300:
+        print("Recommended shirt size is M")
+        return "Recommended shirt size is M"
+    elif max_width>1200 and max_width<1300:
+        print("Recommended shirt size is L")
+        return "Recommended shirt size is L"
+    elif max_width>1300 and max_width<1600:
+        print("Recommended shirt size is XL")
+        return "Recommended shirt size is XL"
+    else:
+        print("Recommeded shirt size is XXL and above")
+        return "Recommended shirt size is XXl and above"
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Help to set arguments for Cloth Segmentation.')
